@@ -1,0 +1,679 @@
+/* =====================================================================
+   Quyosh Paneli Chang Aniqlash Tizimi — "Photovoltaic Console"
+   Drop-in almashtirish: static/css/style.css
+   Barcha class nomlari eski holicha — HTML/JS o'zgartirilmaydi.
+   ===================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap");
+
+:root {
+  /* Kunduzgi: quyosh nurida kremniy */
+  --bg: #eaeef3;
+  --bg-alt: #ffffff;
+  --text: #0d1626;
+  --text-muted: #5d6b80;
+  --border: #d5dde7;
+  --accent: #e08a00;
+  --accent-soft: #fff2d9;
+  --green: #0f8f5f;
+  --green-soft: #e2f5ec;
+  --red: #cf3226;
+  --red-soft: #fdeae8;
+  --amber: #e08a00;
+  --amber-soft: #fff2d9;
+
+  /* Yangi tokenlar */
+  --grid-line: rgba(13, 22, 38, 0.07);
+  --busbar: rgba(13, 22, 38, 0.14);
+  --glow: rgba(224, 138, 0, 0.28);
+  --ink-invert: #ffffff;
+
+  --font-display: "Space Grotesk", "Segoe UI", sans-serif;
+  --font-body: "Inter", "Segoe UI", -apple-system, Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+
+  --shadow: 0 1px 2px rgba(13, 22, 38, 0.06), 0 12px 28px -14px rgba(13, 22, 38, 0.28);
+  --radius: 4px;
+}
+
+:root[data-theme="dark"] {
+  /* Tungi: panel orqasidagi zulmat */
+  --bg: #070b12;
+  --bg-alt: #0f1622;
+  --text: #e9eff8;
+  --text-muted: #8593a8;
+  --border: #1d2634;
+  --accent: #ffb020;
+  --accent-soft: #2a1e08;
+  --green: #2fd193;
+  --green-soft: #0c2b20;
+  --red: #ff6b5e;
+  --red-soft: #2e1512;
+  --amber: #ffb020;
+  --amber-soft: #2a1e08;
+
+  --grid-line: rgba(233, 239, 248, 0.06);
+  --busbar: rgba(233, 239, 248, 0.12);
+  --glow: rgba(255, 176, 32, 0.22);
+  --ink-invert: #070b12;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 32px -18px rgba(0, 0, 0, 0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #070b12;
+    --bg-alt: #0f1622;
+    --text: #e9eff8;
+    --text-muted: #8593a8;
+    --border: #1d2634;
+    --accent: #ffb020;
+    --accent-soft: #2a1e08;
+    --green: #2fd193;
+    --green-soft: #0c2b20;
+    --red: #ff6b5e;
+    --red-soft: #2e1512;
+    --amber: #ffb020;
+    --amber-soft: #2a1e08;
+    --grid-line: rgba(233, 239, 248, 0.06);
+    --busbar: rgba(233, 239, 248, 0.12);
+    --glow: rgba(255, 176, 32, 0.22);
+    --ink-invert: #070b12;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 32px -18px rgba(0, 0, 0, 0.8);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  /* Panel katakchalari fon sifatida */
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 56px 56px, 56px 56px;
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ------------------------------- Topbar ------------------------------ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 28px;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 var(--accent);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar__logo {
+  font-size: 26px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    repeating-linear-gradient(90deg, var(--busbar) 0 1px, transparent 1px 11px),
+    var(--accent-soft);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.12rem;
+  letter-spacing: -0.02em;
+}
+
+.topbar__subtitle {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.icon-btn {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: var(--radius);
+  width: 42px;
+  height: 42px;
+  font-size: 17px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.icon-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateY(-1px);
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 20px 72px;
+}
+
+/* ------------------------------ Bannerlar ---------------------------- */
+.banner {
+  border-radius: var(--radius);
+  padding: 16px 18px 16px 22px;
+  margin-bottom: 26px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+}
+
+.banner--warn {
+  border-left-color: var(--amber);
+  background: var(--amber-soft);
+  color: var(--text);
+}
+
+.banner--warn ol {
+  margin: 10px 0 0 18px;
+  padding: 0;
+}
+
+.banner--warn code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.banner--ok {
+  border-left-color: var(--green);
+  background: var(--green-soft);
+  color: var(--text);
+}
+
+/* ------------------------- Dropzone (signature) ---------------------- */
+.dropzone-section {
+  margin-bottom: 34px;
+}
+
+.dropzone {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    repeating-linear-gradient(90deg, var(--busbar) 0 1px, transparent 1px 13px),
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 100% 78px,
+    var(--bg-alt);
+  padding: 58px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.25s ease;
+}
+
+/* panel yuzasidagi nur — drag paytida yonadi */
+.dropzone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 50% 0%, var(--glow), transparent 62%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.dropzone:hover {
+  border-color: var(--accent);
+}
+
+.dropzone:hover::after {
+  opacity: 0.45;
+}
+
+.dropzone.dragover {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 4px var(--accent-soft);
+}
+
+.dropzone.dragover::after {
+  opacity: 1;
+}
+
+.dropzone__icon {
+  position: relative;
+  font-size: 34px;
+  margin-bottom: 12px;
+}
+
+.dropzone__text {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dropzone__hint {
+  position: relative;
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.dropzone-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+/* ------------------------------ Tugmalar ----------------------------- */
+.btn {
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.btn--ghost {
+  background: transparent;
+}
+
+.btn--small {
+  font-size: 0.66rem;
+  padding: 6px 11px;
+}
+
+/* ----------------------------- Natijalar ----------------------------- */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 20px;
+  margin-bottom: 46px;
+}
+
+.result-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  animation: cardIn 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-card__image-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #05080e;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.result-card__gradcam-toggle {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(7, 11, 18, 0.78);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.result-card__gradcam-toggle:hover {
+  background: var(--accent);
+  color: var(--ink-invert);
+  border-color: var(--accent);
+}
+
+.result-card__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-card__filename {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  color: var(--text-muted);
+}
+
+.result-card__status {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+}
+
+.result-card__status.loading {
+  color: var(--accent);
+}
+
+.result-card__status.loading::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1s ease-in-out infinite;
+  vertical-align: middle;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+
+.result-card__status.error {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.result-card__badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge--clean {
+  background: var(--green-soft);
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+
+.badge--dirty {
+  background: var(--red-soft);
+  color: var(--red);
+  border: 1px solid var(--red);
+}
+
+.pill {
+  display: inline-block;
+  padding: 5px 11px;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.pill--loss {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+/* --------------------------- Ehtimollik barlari ---------------------- */
+.result-card__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 2px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 104px 1fr 52px;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.76rem;
+}
+
+.bar-row__label {
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-row__track {
+  position: relative;
+  height: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* trek ustidagi panel kataklari */
+.bar-row__track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 9px, var(--busbar) 9px 10px);
+  pointer-events: none;
+}
+
+.bar-row__fill {
+  height: 100%;
+  border-radius: 1px;
+  background: var(--text-muted);
+  transition: width 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.bar-row__fill.is-top.is-clean {
+  background: var(--green);
+}
+
+.bar-row__fill.is-top.is-dirty {
+  background: var(--red);
+}
+
+.bar-row__pct {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  color: var(--text);
+}
+
+/* ------------------------------- Tarix ------------------------------- */
+.history-section h2 {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+  box-shadow: var(--shadow);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  min-width: 760px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 11px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.history-table th {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+.history-table td:nth-child(1),
+.history-table td:nth-child(2),
+.history-table td:nth-child(6),
+.history-table td:nth-child(8) {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.history-table tbody tr:hover td {
+  background: var(--accent-soft);
+}
+
+.history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.history-table img {
+  width: 44px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.history-empty td {
+  text-align: center;
+  color: var(--text-muted);
+  white-space: normal;
+  padding: 26px 14px;
+}
+
+.footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  padding: 26px 20px;
+}
+
+/* ------------------------------ Mobil -------------------------------- */
+@media (max-width: 600px) {
+  body {
+    background-size: 40px 40px, 40px 40px;
+  }
+
+  .topbar {
+    padding: 13px 16px;
+  }
+
+  .topbar h1 {
+    font-size: 1rem;
+  }
+
+  .container {
+    padding: 20px 12px 48px;
+  }
+
+  .dropzone {
+    padding: 38px 14px;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bar-row {
+    grid-template-columns: 78px 1fr 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quyosh Paneli Nosozliklarini Aniqlash Tizimi</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__logo">☀️</span>
+      <div>
+        <h1>Quyosh Paneli Nazorati</h1>
+        <p class="topbar__subtitle">Chang, shikast va nosozliklarni aniqlash tizimi — AI asosida</p>
+      </div>
+    </div>
+    <button id="themeToggle" class="icon-btn" title="Mavzuni almashtirish" aria-label="Mavzuni almashtirish">
+      <span id="themeIcon">🌙</span>
+    </button>
+  </header>
+
+  <main class="container">
+    {% if not model_available %}
+    <div class="banner banner--warn">
+      <strong>Diqqat:</strong> Trenirovka qilingan model topilmadi.
+      Ilova ishlayapti, lekin tahlil qilish uchun avval modelni o'qitishingiz kerak:
+      <ol>
+        <li>Kaggle datasetini <code>data/</code> papkasiga joylashtiring (README.md ga qarang).</li>
+        <li>Terminalda ishga tushiring: <code>python train.py</code></li>
+        <li>Trening tugagach, bu sahifani yangilang.</li>
+      </ol>
+    </div>
+    {% else %}
+    <div class="banner banner--ok" id="modelInfoBanner">
+      Model tayyor ✓ &nbsp; Aniqlanadigan sinflar: <strong>{{ class_names|join(', ') }}</strong>
+    </div>
+    {% endif %}
+
+    <section class="dropzone-section">
+      <div id="dropzone" class="dropzone">
+        <div class="dropzone__icon">📤</div>
+        <p class="dropzone__text">Rasmlarni shu yerga tashlang yoki tanlash uchun bosing</p>
+        <p class="dropzone__hint">JPG, PNG, BMP, WEBP — bir nechta faylni birdaniga yuklash mumkin</p>
+        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.bmp,.webp" multiple hidden />
+      </div>
+      <div class="dropzone-actions">
+        <button id="clearResultsBtn" class="btn btn--ghost">Natijalarni tozalash</button>
+      </div>
+    </section>
+
+    <section id="resultsGrid" class="results-grid"></section>
+
+    <section class="history-section">
+      <h2>Tekshiruvlar tarixi (joriy sessiya)</h2>
+      <div class="table-wrap">
+        <table class="history-table" id="historyTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Vaqt</th>
+              <th>Rasm</th>
+              <th>Fayl nomi</th>
+              <th>Natija</th>
+              <th>Ishonch</th>
+              <th>Ta'sir darajasi</th>
+              <th>Quvvat yo'qotish</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr class="history-empty">
+              <td colspan="8">Hozircha tekshiruvlar yo'q.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Offline ishlaydigan AI tizim &middot; PyTorch + FastAPI
+  </footer>
+
+  <template id="resultCardTemplate">
+    <article class="result-card">
+      <div class="result-card__image-wrap">
+        <img class="result-card__image" alt="Yuklangan rasm" />
+        <button class="result-card__gradcam-toggle btn btn--small" type="button">Issiqlik xaritasi</button>
+      </div>
+      <div class="result-card__body">
+        <div class="result-card__filename"></div>
+        <div class="result-card__status"></div>
+        <div class="result-card__badge-row" hidden>
+          <span class="badge"></span>
+          <span class="pill pill--severity"></span>
+          <span class="pill pill--loss"></span>
+        </div>
+        <div class="result-card__bars"></div>
+      </div>
+    </article>
+  </template>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
