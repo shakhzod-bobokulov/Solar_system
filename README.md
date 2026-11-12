@@ -16,30 +16,35 @@ Grad-CAM issiqlik xaritasi orqali muammo joylashgan hududni ko'rsatadi.
 
 ```
 solar/
-├── app.py                 # FastAPI web-server
-├── train.py                # Modelni o'qitish skripti
-├── predict.py               # Bitta rasm uchun inference + Grad-CAM
-├── config.py                # Umumiy sozlamalar, sinf metama'lumotlari
+├── app.py                  # FastAPI web-server (sahifalar + API)
+├── auth.py                 # Admin/foydalanuvchi autentifikatsiyasi, sessiya
+├── store.py                # SQLite: tekshiruvlar, foydalanuvchilar, panellar, sozlamalar
+├── mailer.py               # SMTP orqali tasdiqlash kodlari
+├── imagetools.py           # EXIF GPS, rasm sifati tekshiruvi, kichik nusxa, ZIP
+├── train.py                # Oddiy rasm modelini o'qitish skripti
+├── predict.py              # Inference + Grad-CAM (oddiy rasm)
+├── predict_thermal.py      # Inference (termal/infraqizil rasm)
+├── seed_demo_user.py       # Sinov uchun demo foydalanuvchi yaratish
+├── config.py               # Sozlamalar, sinf metama'lumotlari
 ├── requirements.txt
 ├── README.md
-├── data/                    # <-- Kaggle datasetini shu yerga joylang
-│   ├── Clean/
-│   ├── Dusty/
-│   ├── Bird-drop/            (mavjud bo'lsa)
-│   ├── Physical-damage/      (mavjud bo'lsa)
-│   ├── Electrical-damage/    (mavjud bo'lsa)
-│   └── Snow-covered/         (mavjud bo'lsa)
+├── colab/
+│   └── thermal_model.ipynb # Termal modelni Colab'da o'qitish daftari
+├── data/                   # <-- Kaggle datasetini shu yerga joylang
+│   ├── Clean/  Dusty/  Bird-drop/  Physical-damage/
+│   └── Electrical-damage/  Snow-covered/   (oxirgi to'rttasi ixtiyoriy)
 ├── model/
-│   ├── model.pt              # Trening natijasida yaratiladi
-│   ├── class_names.json      # Trening natijasida yaratiladi
-│   └── plots/
-│       ├── training_curves.png
-│       └── confusion_matrix.png
+│   ├── model.pt            # Trening natijasida yaratiladi
+│   ├── class_names.json
+│   ├── thermal_model.pt    # (ixtiyoriy) Colab natijasi
+│   └── plots/              # training_curves.png, confusion_matrix.png
 ├── static/
-│   ├── style.css
-│   └── app.js
+│   ├── style.css, app.js, common.js, i18n.js (UZ/RU/EN)
+│   ├── login.js, account.js, admin.js, map.js
+│   ├── sw.js, manifest.webmanifest, icons/   # PWA
 └── templates/
-    └── index.html
+    ├── index.html, _controls.html
+    ├── login.html, account.html, admin.html
 ```
 
 ---
@@ -152,6 +157,8 @@ Brauzerda oching: **http://127.0.0.1:8000**
 
 - Agar `model/model.pt` hali mavjud bo'lmasa, sahifa yuqorida ogohlantirish bilan ochiladi va trening bosqichlarini ko'rsatadi — server baribir ishlayveradi, xatoga tushmaydi.
 - Model tayyor bo'lgach, sahifani yangilang — endi rasm yuklab tahlil qilishingiz mumkin.
+
+> Demo uchun tayyor foydalanuvchi: `python seed_demo_user.py` (faqat mahalliy sinov uchun).
 
 ### UI imkoniyatlari
 
