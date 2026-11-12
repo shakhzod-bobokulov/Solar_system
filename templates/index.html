@@ -3,103 +3,314 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Quyosh Paneli Nosozliklarini Aniqlash Tizimi</title>
+  <title>Quyosh Paneli Nazorati</title>
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="topbar__brand">
-      <span class="topbar__logo">☀️</span>
-      <div>
-        <h1>Quyosh Paneli Nazorati</h1>
-        <p class="topbar__subtitle">Chang, shikast va nosozliklarni aniqlash tizimi — AI asosida</p>
+    <div class="topbar__inner">
+      <div class="topbar__brand">
+        <span class="topbar__logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </span>
+        <div>
+          <h1 data-i18n="app.title">Quyosh Paneli Nazorati</h1>
+          <p class="topbar__subtitle" data-i18n="app.subtitle">Chang va nosozliklarni sun'iy intellekt yordamida aniqlash</p>
+        </div>
+      </div>
+      <div class="topbar__actions">
+        {% if model_available %}
+        <span class="status status--ok" id="modelInfoBanner"><i></i><span data-i18n="status.ready">Model tayyor</span></span>
+        {% else %}
+        <span class="status status--warn"><i></i><span data-i18n="status.missing">Model topilmadi</span></span>
+        {% endif %}
+        {% include "_controls.html" %}
+        {% if user %}
+        <a class="btn" href="/account" data-i18n="nav.account">Kabinet</a>
+        {% if is_admin %}
+        <a class="btn" href="/admin" data-i18n="nav.admin">Admin panel</a>
+        {% endif %}
+        <span class="user-chip" title="{{ user }}">{{ user }}</span>
+        <button id="logoutBtn" class="btn btn--ghost" type="button" data-i18n="nav.logout">Chiqish</button>
+        {% else %}
+        <a class="btn btn--primary" href="/login" data-i18n="nav.login">Kirish</a>
+        {% endif %}
       </div>
     </div>
-    <button id="themeToggle" class="icon-btn" title="Mavzuni almashtirish" aria-label="Mavzuni almashtirish">
-      <span id="themeIcon">🌙</span>
-    </button>
   </header>
 
   <main class="container">
     {% if not model_available %}
     <div class="banner banner--warn">
-      <strong>Diqqat:</strong> Trenirovka qilingan model topilmadi.
-      Ilova ishlayapti, lekin tahlil qilish uchun avval modelni o'qitishingiz kerak:
+      <strong data-i18n="model.missing.title">O'qitilgan model topilmadi.</strong>
+      <span data-i18n="model.missing.text">Tahlil qilish uchun avval modelni o'qitish kerak:</span>
       <ol>
-        <li>Kaggle datasetini <code>data/</code> papkasiga joylashtiring (README.md ga qarang).</li>
-        <li>Terminalda ishga tushiring: <code>python train.py</code></li>
-        <li>Trening tugagach, bu sahifani yangilang.</li>
+        <li data-i18n="model.missing.step1">Datasetni data/ papkasiga joylashtiring (README.md ga qarang).</li>
+        <li data-i18n="model.missing.step2">Terminalda ishga tushiring: python train.py</li>
+        <li data-i18n="model.missing.step3">Trening tugagach, sahifani yangilang.</li>
       </ol>
-    </div>
-    {% else %}
-    <div class="banner banner--ok" id="modelInfoBanner">
-      Model tayyor ✓ &nbsp; Aniqlanadigan sinflar: <strong>{{ class_names|join(', ') }}</strong>
     </div>
     {% endif %}
 
-    <section class="dropzone-section">
-      <div id="dropzone" class="dropzone">
-        <div class="dropzone__icon">📤</div>
-        <p class="dropzone__text">Rasmlarni shu yerga tashlang yoki tanlash uchun bosing</p>
-        <p class="dropzone__hint">JPG, PNG, BMP, WEBP — bir nechta faylni birdaniga yuklash mumkin</p>
-        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.bmp,.webp" multiple hidden />
+    <section class="hero">
+      <h2 class="hero__title" data-i18n="hero.title">Panel rasmini yuklang — tizim uni tahlil qiladi</h2>
+      <p class="hero__lead" data-i18n="hero.lead">Tizim quyosh panelining fotosuratiga qarab, uning yuzasida quvvatni kamaytiradigan ifloslik yoki shikast bor-yo'qligini aniqlaydi. Ro'yxatdan o'tish shart emas.</p>
+
+      <h3 class="subhead" data-i18n="detect.title">Tizim nimalarni qidiradi</h3>
+      <div class="detect">
+        <article class="detect__card detect__card--ok">
+          <h4 data-i18n="class.clean">Toza</h4>
+          <p data-i18n="detect.clean">Panel yuzasi toza, sezilarli nuqson yo'q.</p>
+          <span class="detect__loss" data-loss="0-2"></span>
+        </article>
+        <article class="detect__card">
+          <h4 data-i18n="class.dusty">Changlangan</h4>
+          <p data-i18n="detect.dusty">Yuzada chang qatlami: yorug'lik o'tishi kamayadi.</p>
+          <span class="detect__loss" data-loss="15-25"></span>
+        </article>
+        <article class="detect__card">
+          <h4 data-i18n="class.bird-drop">Qush go'ng'i</h4>
+          <p data-i18n="detect.bird">Qush chiqindisi dog'lari: katak ustida mahalliy soya hosil qiladi.</p>
+          <span class="detect__loss" data-loss="10-20"></span>
+        </article>
+        <article class="detect__card">
+          <h4 data-i18n="class.snow-covered">Qor bosgan</h4>
+          <p data-i18n="detect.snow">Panel qor bilan qoplangan: ishlab chiqarish deyarli to'xtaydi.</p>
+          <span class="detect__loss" data-loss="30-60"></span>
+        </article>
+        <article class="detect__card">
+          <h4 data-i18n="class.physical-damage">Jismoniy shikast</h4>
+          <p data-i18n="detect.physical">Yoriq, sinish yoki zarba izlari: shisha va katakchalar shikastlangan.</p>
+          <span class="detect__loss" data-loss="20-40"></span>
+        </article>
+        <article class="detect__card">
+          <h4 data-i18n="class.electrical-damage">Elektr shikast</h4>
+          <p data-i18n="detect.electrical">Kuyish izlari, qizib ketgan joylar yoki elektr zanjiri nosozligi belgilari.</p>
+          <span class="detect__loss" data-loss="25-50"></span>
+        </article>
       </div>
-      <div class="dropzone-actions">
-        <button id="clearResultsBtn" class="btn btn--ghost">Natijalarni tozalash</button>
+
+      <h3 class="subhead" data-i18n="how.title">Qanday ishlaydi</h3>
+      <ol class="steps">
+        <li><b data-i18n="how.1.t">1. Rasm yuklang</b><span data-i18n="how.1.d">Panelning aniq, yaxshi yoritilgan fotosuratini tanlang (bir nechta rasm mumkin).</span></li>
+        <li><b data-i18n="how.2.t">2. Sun'iy intellekt tahlili</b><span data-i18n="how.2.d">Neyron tarmoq rasmni 6 holatdan biriga ajratadi va har biri uchun ehtimollikni hisoblaydi.</span></li>
+        <li><b data-i18n="how.3.t">3. Natija va tavsiya</b><span data-i18n="how.3.d">Siz holat, taxminiy quvvat yo'qotish, tavsiya etilgan chora va muammo joyini ko'rsatuvchi issiqlik xaritasini olasiz.</span></li>
+      </ol>
+      <p class="note" data-i18n="how.note">Quvvat yo'qotish qiymatlari taxminiy bo'lib, aniq o'lchov o'rnini bosmaydi.</p>
+    </section>
+
+    <!-- ============================== Yuklash ============================== -->
+    <section class="dropzone-section">
+      <div class="upload-head">
+        <div class="seg" id="modeSwitch" role="group" aria-label="Mode">
+          <button type="button" class="seg__btn is-active" data-mode="rgb" data-i18n="mode.rgb">Oddiy rasm</button>
+          <button type="button" class="seg__btn" data-mode="thermal" id="modeThermal" data-i18n="mode.thermal">Termal (infraqizil)</button>
+        </div>
+
+        {% if user %}
+        <div class="panel-pick">
+          <label for="panelSelect" data-i18n="panel.label">Panel</label>
+          <select id="panelSelect" class="input">
+            <option value="" data-i18n="panel.none">— Panelsiz —</option>
+            {% for p in panels %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+            <option value="__new__" data-i18n="panel.new">+ Yangi panel...</option>
+          </select>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if user %}
+      <div class="newpanel" id="newPanelRow" hidden>
+        <input type="text" id="newPanelName" class="input" maxlength="60" data-i18n-placeholder="panel.name" placeholder="Panel nomi (masalan: 3-panel)" />
+        <input type="text" id="newPanelLat" class="input input--coord" inputmode="decimal" placeholder="lat" />
+        <input type="text" id="newPanelLon" class="input input--coord" inputmode="decimal" placeholder="lon" />
+        <button type="button" class="btn btn--small" id="newPanelGeo" data-i18n="panel.geo">Joylashuvim</button>
+        <button type="button" class="btn btn--primary btn--small" id="newPanelAdd" data-i18n="panel.add">Qo'shish</button>
+        <button type="button" class="btn btn--ghost btn--small" id="newPanelCancel" data-i18n="panel.cancel">Bekor qilish</button>
+        <span class="form__error form__error--inline" id="newPanelError" hidden></span>
+      </div>
+      {% endif %}
+
+      <p class="mode-hint" id="modeHint"></p>
+
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" data-i18n-aria="dz.aria" aria-label="Rasm yuklash">
+        <span class="dropzone__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        </span>
+        <p class="dropzone__text"><span class="dropzone__lead" data-i18n="dz.text">Rasmlarni shu yerga tashlang yoki </span><span class="dropzone__pick" data-i18n="dz.pick">fayl tanlang</span></p>
+        <p class="dropzone__hint" data-i18n="dz.hint2">JPG, PNG, BMP, WEBP yoki ZIP · Ctrl+V bilan buferdan joylash mumkin</p>
+        <div class="dropzone__actions">
+          <button type="button" class="btn btn--small" id="cameraBtn">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span data-i18n="dz.camera">Kamera</span>
+          </button>
+          <button type="button" class="btn btn--small" id="folderBtn">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span data-i18n="dz.folder">Papka</span>
+          </button>
+        </div>
+        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.bmp,.webp,.zip" multiple hidden />
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden />
+        <input type="file" id="folderInput" webkitdirectory directory multiple hidden />
+      </div>
+
+      <div class="progress" id="progress" hidden>
+        <div class="progress__track"><i id="progressBar"></i></div>
+        <span class="progress__text" id="progressText"></span>
       </div>
     </section>
 
-    <section id="resultsGrid" class="results-grid"></section>
+    <section class="stats">
+      <div class="stat">
+        <span class="stat__label" data-i18n="stat.total">Tekshirilgan</span>
+        <span class="stat__value" id="statTotal">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat__label" data-i18n="stat.clean">Toza panellar</span>
+        <span class="stat__value stat__value--ok" id="statClean">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat__label" data-i18n="stat.faulty">Nosoz panellar</span>
+        <span class="stat__value stat__value--bad" id="statDirty">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat__label" data-i18n="stat.loss">O'rtacha quvvat yo'qotish</span>
+        <span class="stat__value" id="statLoss">&ndash;</span>
+      </div>
+    </section>
 
-    <section class="history-section">
-      <h2>Tekshiruvlar tarixi (joriy sessiya)</h2>
+    <!-- ===================== Yo'qotish kalkulyatori ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 data-i18n="calc.title">Yo'qotish kalkulyatori</h2>
+        <span class="section__note" data-i18n="calc.note">Taxminiy hisob</span>
+      </div>
+      <div class="card calc">
+        <div class="calc__inputs">
+          <label class="field field--sm"><span data-i18n="calc.watts">Bitta panel quvvati (W)</span>
+            <input type="number" id="calcWatts" class="input" min="1" step="10" value="400" /></label>
+          <label class="field field--sm"><span data-i18n="calc.count">Panellar soni</span>
+            <input type="number" id="calcCount" class="input" min="1" step="1" value="10" /></label>
+          <label class="field field--sm"><span data-i18n="calc.hours">Kunlik quyosh soati</span>
+            <input type="number" id="calcHours" class="input" min="0.5" max="12" step="0.5" value="5" /></label>
+          <label class="field field--sm"><span data-i18n="calc.tariff">Tarif (so'm / kWh)</span>
+            <input type="number" id="calcTariff" class="input" min="0" step="10" value="1000" /></label>
+          <label class="field field--sm"><span data-i18n="calc.loss">Yo'qotish (%)</span>
+            <input type="number" id="calcLoss" class="input" min="0" max="100" step="0.1" value="0" /></label>
+          <label class="check check--inline"><input type="checkbox" id="calcAuto" checked /><span data-i18n="calc.auto">Natijalardan o'rtacha olish</span></label>
+        </div>
+        <div class="calc__out">
+          <div class="calc__item"><span data-i18n="calc.out.kwh">Oyiga yo'qotiladigan energiya</span><b id="calcKwh">–</b></div>
+          <div class="calc__item"><span data-i18n="calc.out.month">Oylik zarar</span><b id="calcMonth">–</b></div>
+          <div class="calc__item"><span data-i18n="calc.out.year">Yillik zarar</span><b id="calcYear">–</b></div>
+          <p class="note" id="calcNote" data-i18n="calc.hint">Nosoz panellarni tozalash/ta'mirlash shu yo'qotishning katta qismini qaytaradi. Qiymatlar taxminiy: real ishlab chiqarish ob-havo va yuklamaga bog'liq.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== Natijalar ============================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 data-i18n="results.title">Natijalar</h2>
+        <div class="section__actions">
+          <button id="reportBtn" class="btn" type="button" data-i18n="results.pdf">PDF hisobot</button>
+          <button id="clearResultsBtn" class="btn btn--ghost" type="button" data-i18n="results.clear">Tozalash</button>
+        </div>
+      </div>
+      <div id="resultsGrid" class="results-grid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section__head">
+        <h2 data-i18n="history.title">Tekshiruvlar tarixi</h2>
+        <span class="section__note" data-i18n="history.session">Joriy sessiya</span>
+      </div>
       <div class="table-wrap">
         <table class="history-table" id="historyTable">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Vaqt</th>
-              <th>Rasm</th>
-              <th>Fayl nomi</th>
-              <th>Natija</th>
-              <th>Ishonch</th>
-              <th>Ta'sir darajasi</th>
-              <th>Quvvat yo'qotish</th>
+              <th data-i18n="col.num">#</th>
+              <th data-i18n="col.time">Vaqt</th>
+              <th data-i18n="col.image">Rasm</th>
+              <th data-i18n="col.file">Fayl nomi</th>
+              <th data-i18n="col.result">Natija</th>
+              <th data-i18n="col.confidence">Ishonch</th>
+              <th data-i18n="col.severity">Ta'sir darajasi</th>
+              <th data-i18n="col.loss">Quvvat yo'qotish</th>
             </tr>
           </thead>
-          <tbody id="historyBody">
-            <tr class="history-empty">
-              <td colspan="8">Hozircha tekshiruvlar yo'q.</td>
-            </tr>
-          </tbody>
+          <tbody id="historyBody"></tbody>
         </table>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    Offline ishlaydigan AI tizim &middot; PyTorch + FastAPI
-  </footer>
+  <footer class="footer" data-i18n="app.footer">Quyosh Paneli Nazorati · PyTorch + FastAPI</footer>
+
+  <!-- ============== Kattalashtirish oynasi (lightbox) ============== -->
+  <div class="lb" id="lightbox" hidden role="dialog" aria-modal="true">
+    <div class="lb__bar">
+      <div class="lb__title" id="lbTitle"></div>
+      <div class="lb__tools">
+        <label class="lb__opacity"><span data-i18n="lb.opacity">Shaffoflik</span>
+          <input type="range" id="lbOpacity" min="0" max="100" value="65" /></label>
+        <label class="check check--light"><input type="checkbox" id="lbHeatToggle" checked /><span data-i18n="lb.heat">Issiqlik</span></label>
+        <label class="check check--light" id="lbMaskWrap" hidden><input type="checkbox" id="lbMaskToggle" checked /><span data-i18n="lb.mask">Issiq hudud</span></label>
+        <button type="button" class="lb__btn" id="lbZoomOut" aria-label="−">−</button>
+        <button type="button" class="lb__btn" id="lbZoomIn" aria-label="+">+</button>
+        <button type="button" class="lb__btn lb__btn--text" id="lbReset" data-i18n="lb.reset">1:1</button>
+        <button type="button" class="lb__btn" id="lbClose" data-i18n-aria="lb.close" aria-label="Yopish">✕</button>
+      </div>
+    </div>
+    <div class="lb__stage" id="lbStage">
+      <div class="lb__layer" id="lbLayer">
+        <img id="lbBase" alt="" draggable="false" />
+        <img id="lbHeat" alt="" draggable="false" />
+        <img id="lbMask" alt="" draggable="false" hidden />
+      </div>
+    </div>
+    <div class="lb__hint" data-i18n="lb.hint">G'ildirak yoki ikki barmoq bilan kattalashtiring, sudrab siljiting. Esc — yopish.</div>
+  </div>
 
   <template id="resultCardTemplate">
     <article class="result-card">
       <div class="result-card__image-wrap">
-        <img class="result-card__image" alt="Yuklangan rasm" />
-        <button class="result-card__gradcam-toggle btn btn--small" type="button">Issiqlik xaritasi</button>
+        <img class="result-card__image" alt="" />
+        <img class="result-card__heat" alt="" hidden />
+        <img class="result-card__mask" alt="" hidden />
+        <button class="result-card__zoom" type="button" data-i18n-aria="card.zoom" aria-label="Kattalashtirish" hidden>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </button>
+        <div class="result-card__layers">
+          <button class="result-card__gradcam-toggle btn btn--small" type="button"></button>
+          <button class="result-card__mask-toggle btn btn--small" type="button" hidden></button>
+        </div>
       </div>
       <div class="result-card__body">
         <div class="result-card__filename"></div>
         <div class="result-card__status"></div>
         <div class="result-card__badge-row" hidden>
           <span class="badge"></span>
-          <span class="pill pill--severity"></span>
+          <span class="pill pill--soiling"></span>
           <span class="pill pill--loss"></span>
+          <span class="pill pill--hot" hidden></span>
+          <span class="pill pill--gps" hidden></span>
         </div>
+        <div class="result-card__warnings" hidden></div>
+        <label class="result-card__slider" hidden><span data-i18n="lb.opacity">Shaffoflik</span><input type="range" min="0" max="100" value="65" /></label>
         <div class="result-card__bars"></div>
+        <div class="result-card__feedback" hidden></div>
       </div>
     </article>
   </template>
 
+  <script type="application/json" id="appState">{{ {"classNames": class_names, "thermalNames": thermal_class_names, "thermal": thermal_available, "model": model_available, "maxFiles": max_files, "loggedIn": (true if user else false), "user": user or ""}|tojson }}</script>
+  <script src="/static/i18n.js"></script>
+  <script src="/static/common.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

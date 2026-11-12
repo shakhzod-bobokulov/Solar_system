@@ -145,31 +145,60 @@ def get_class_names() -> list:
     return load_model().class_names
 
 
-def _colorize_cam(cam: np.ndarray, size) -> Image.Image:
-    """Map a 0..1 grayscale CAM array to a jet-like RGBA heatmap image."""
-    # Simple jet-style colormap without needing matplotlib at inference time.
-    cam_img = Image.fromarray((cam * 255).astype(np.uint8)).resize(size, Image.BILINEAR)
-    cam_arr = np.asarray(cam_img).astype(np.float32) / 255.0
+def full_cam(cam: np.ndarray, size, img_size: int) -> np.ndarray:
+    """Markaziy qirqim (img_size x img_size) CAM'ini asl rasm (w, h) o'lchamiga joylaydi.
 
+    Model rasmning faqat markaziy kvadratini ko'radi (Resize + CenterCrop), shuning uchun
+    CAM ham faqat shu kvadrat ustiga tushishi kerak; qolgan joy 0 bo'ladi.
+    """
+    w, h = size
+    frac = img_size / int(img_size * 1.14)
+    side = max(1, int(round(min(w, h) * frac)))
+    cam_img = Image.fromarray((cam * 255).astype(np.uint8)).resize((side, side), Image.BILINEAR)
+    canvas = Image.new("L", (w, h), 0)
+    canvas.paste(cam_img, ((w - side) // 2, (h - side) // 2))
+    return np.asarray(canvas).astype(np.float32) / 255.0
+
+
+def jet_rgb(cam_arr: np.ndarray) -> np.ndarray:
+    """0..1 massivni jet-uslubidagi RGB (uint8) ga aylantiradi (matplotlib kerak emas)."""
     r = np.clip(1.5 - np.abs(4 * cam_arr - 3), 0, 1)
     g = np.clip(1.5 - np.abs(4 * cam_arr - 2), 0, 1)
     b = np.clip(1.5 - np.abs(4 * cam_arr - 1), 0, 1)
-    heatmap = np.stack([r, g, b], axis=-1)
-    return Image.fromarray((heatmap * 255).astype(np.uint8)).convert("RGB")
+    return (np.stack([r, g, b], axis=-1) * 255).astype(np.uint8)
 
 
-def _overlay_heatmap(original: Image.Image, cam: np.ndarray, alpha: float = 0.45) -> Image.Image:
-    original_rgb = original.convert("RGB")
-    heatmap = _colorize_cam(cam, original_rgb.size)
-    blended = Image.blend(original_rgb, heatmap, alpha)
-    return blended
+def heatmap_rgba(cam_full: np.ndarray, max_side: int = 320) -> Image.Image:
+    """Shaffof issiqlik qatlami: faol joylar ko'rinadi, passiv joylar shaffof.
+
+    Brauzerda asl rasm ustiga qo'yilib, shaffoflik slayderi bilan boshqariladi.
+    """
+    img = Image.fromarray((cam_full * 255).astype(np.uint8))
+    scale = max_side / max(img.size)
+    if scale < 1:
+        img = img.resize((max(1, int(img.width * scale)), max(1, int(img.height * scale))), Image.BILINEAR)
+    arr = np.asarray(img).astype(np.float32) / 255.0
+    alpha = (np.clip(arr * 1.6, 0, 1) * 0.85 * 255).astype(np.uint8)
+    return Image.fromarray(np.dstack([jet_rgb(arr), alpha]), "RGBA")
+
+
+def overlay_heatmap(original: Image.Image, heat: Image.Image) -> Image.Image:
+    base = original.convert("RGBA")
+    return Image.alpha_composite(base, heat.resize(base.size, Image.BILINEAR)).convert("RGB")
 
 
 def _to_base64_png(image: Image.Image) -> str:
     buf = io.BytesIO()
-    image.save(buf, format="PNG")
+    image.save(buf, format="PNG", optimize=True)
     encoded = base64.b64encode(buf.getvalue()).decode("ascii")
     return f"data:image/png;base64,{encoded}"
+
+
+def to_base64_jpeg(image: Image.Image, quality: int = 85) -> str:
+    buf = io.BytesIO()
+    image.convert("RGB").save(buf, format="JPEG", quality=quality)
+    encoded = base64.b64encode(buf.getvalue()).decode("ascii")
+    return f"data:image/jpeg;base64,{encoded}"
 
 
 def analyze_image(pil_image: Image.Image) -> dict:
@@ -196,8 +225,10 @@ def analyze_image(pil_image: Image.Image) -> dict:
     confidence = float(probs[predicted_idx].item())
 
     cam = bundle.gradcam.generate(logits, predicted_idx)
-    overlay = _overlay_heatmap(image_rgb, cam)
-    gradcam_b64 = _to_base64_png(overlay)
+    cam_full = full_cam(cam, image_rgb.size, bundle.img_size)
+    heat = heatmap_rgba(cam_full)
+    gradcam_b64 = to_base64_jpeg(overlay_heatmap(image_rgb, heat))
+    heatmap_b64 = _to_base64_png(heat)
 
     probabilities = {
         bundle.class_names[i]: float(probs[i].item()) for i in range(len(bundle.class_names))
@@ -208,6 +239,7 @@ def analyze_image(pil_image: Image.Image) -> dict:
         "confidence": confidence,
         "probabilities": probabilities,
         "gradcam_base64": gradcam_b64,
+        "heatmap_base64": heatmap_b64,
     }
 
 

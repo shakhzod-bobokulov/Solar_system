@@ -124,6 +124,53 @@ def get_class_info(class_name: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Termal (infraqizil) model — Colab daftarida o'qitiladi (colab/thermal_model.ipynb)
+# ---------------------------------------------------------------------------
+THERMAL_MODEL_PATH = os.environ.get(
+    "THERMAL_MODEL_PATH", os.path.join(MODEL_DIR, "thermal_model.pt")
+)
+
+# Quvvat yo'qotish diapazonlari — o'lchov EMAS, muhandislik mantiqiga asoslangan taxminiy baho
+# (masalan: faollashgan bypass diod odatda modulning ~1/3 qismini o'chiradi).
+THERMAL_CLASS_INFO = {
+    "no-anomaly":     {"loss_range": (0, 1),    "is_clean": True,  "category": "clean"},
+    "cell":           {"loss_range": (2, 8),    "is_clean": False, "category": "hotspot"},
+    "cell-multi":     {"loss_range": (6, 15),   "is_clean": False, "category": "hotspot"},
+    "hot-spot":       {"loss_range": (2, 8),    "is_clean": False, "category": "hotspot"},
+    "hot-spot-multi": {"loss_range": (6, 15),   "is_clean": False, "category": "hotspot"},
+    "cracking":       {"loss_range": (3, 12),   "is_clean": False, "category": "damage"},
+    "diode":          {"loss_range": (25, 35),  "is_clean": False, "category": "electrical"},
+    "diode-multi":    {"loss_range": (50, 70),  "is_clean": False, "category": "electrical"},
+    "offline-module": {"loss_range": (90, 100), "is_clean": False, "category": "electrical"},
+    "shadowing":      {"loss_range": (10, 30),  "is_clean": False, "category": "obstruction"},
+    "vegetation":     {"loss_range": (10, 40),  "is_clean": False, "category": "obstruction"},
+    "soiling":        {"loss_range": (5, 20),   "is_clean": False, "category": "soiling"},
+}
+
+
+def get_thermal_info(class_name: str) -> dict:
+    return THERMAL_CLASS_INFO.get(
+        normalize_class_key(class_name),
+        {"loss_range": (10, 30), "is_clean": False, "category": "damage"},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Yuklash chegaralari va sifat tekshiruvi
+# ---------------------------------------------------------------------------
+MAX_FILES_PER_REQUEST = 20
+MAX_ZIP_ENTRIES = 60
+MAX_ZIP_TOTAL_BYTES = 200 * 1024 * 1024   # arxiv ichidagi fayllarning umumiy hajmi
+MAX_IMAGE_SIDE = 1280                      # tahlil/ko'rsatish uchun rasm shu o'lchamgacha kichraytiriladi
+THUMB_SIDE = 96
+
+LOW_CONFIDENCE = 0.60                      # undan past ishonchda "natija aniq emas" ogohlantirishi
+BLUR_THRESHOLD = 100.0                     # Laplasian dispersiyasi (256 px da); dataset: o'tkir >=284, xira <=4
+DARK_THRESHOLD = 45                        # o'rtacha yorqinlik (0..255)
+BRIGHT_THRESHOLD = 220
+MIN_SIDE_PX = 200                          # undan kichik rasm "past ruxsat"
+
+# ---------------------------------------------------------------------------
 # Training defaults
 # ---------------------------------------------------------------------------
 DEFAULT_EPOCHS = 25
